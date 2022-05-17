@@ -1,5 +1,3 @@
-/// <reference types="types-for-adobe/Illustrator/2015.3"/>
-
 try {
   /**********************************
    ** README https://github.com/Artchibald/WTW-illustrator-script
@@ -8,28 +6,6 @@ try {
     alert("App V  ersion : ", app.version);
   alert("App Scripting Version: ", app.scriptingVersion);
    ***********************************/
-
-  /**********************************
-   ** GLOBAL VARIABLES
-   ***********************************/
-
-  const pngFileData = [
-    { size: "24x24", offset: 9.375 },
-    { size: "32x32", offset: 12.5 },
-    { size: "48x48", offset: 18.75 },
-    { size: "64x64", offset: 25 },
-    { size: "300x300", offset: 117.2 },
-    { size: "512x512", offset: 12.5 },
-  ];
-
-  const filenameArray = ["SVG", "EPS"];
-
-  for (const file of pngFileData) {
-    filenameArray.push(file.size);
-  }
-
-  const rootPath = app.activeDocument.path.toString();
-  const layers = app.activeDocument.layers;
 
   /**********************************
    ** INSTRUCTIONS DIALOG
@@ -43,7 +19,7 @@ try {
    ***********************************/
   try {
     // alert(app.version);
-    layers["icons"].visible = true;
+    app.activeDocument.layers["icons"].visible = true;
   } catch (e) {
     alert(
       "can't locate the top level layer called 'icons', the script won't work without it.",
@@ -54,7 +30,7 @@ try {
    ** REMOVE GUIDES LAYER
    ***********************************/
   try {
-    let guideLayer = layers["Guides (DO NOT MOVE)"];
+    let guideLayer = app.activeDocument.layers["Guides (DO NOT MOVE)"];
     guideLayer.visible = true;
     guideLayer.locked = false;
     guideLayer.remove();
@@ -69,10 +45,63 @@ try {
    ** CREATE REQUIRED FOLDERS
    ***********************************/
   try {
-    for (const filename of filenameArray) {
-      const destFolder = Folder(rootPath + "/" + filename);
+    let sourceDoc = app.activeDocument;
+    let name300x300 = "300x300";
+    let name512x512 = "512x512";
+    let name64x64 = "64x64";
+    let name48x48 = "48x48";
+    let name32x32 = "32x32";
+    let name24x24 = "24x24";
+    let nameSVG = "SVG";
+    let nameEPS = "EPS";
+
+    function create24x24Folder() {
+      let destFolder = Folder(sourceDoc.path + "/" + name24x24);
       if (!destFolder.exists) destFolder.create();
     }
+    create24x24Folder();
+
+    function create32x32Folder() {
+      let destFolder = Folder(sourceDoc.path + "/" + name32x32);
+      if (!destFolder.exists) destFolder.create();
+    }
+    create32x32Folder();
+
+    function create48x48Folder() {
+      let destFolder = Folder(sourceDoc.path + "/" + name48x48);
+      if (!destFolder.exists) destFolder.create();
+    }
+    create48x48Folder();
+
+    function create64x64Folder() {
+      let destFolder = Folder(sourceDoc.path + "/" + name64x64);
+      if (!destFolder.exists) destFolder.create();
+    }
+    create64x64Folder();
+
+    function create300x300Folder() {
+      let destFolder = Folder(sourceDoc.path + "/" + name300x300);
+      if (!destFolder.exists) destFolder.create();
+    }
+    create300x300Folder();
+
+    function create512x512Folder() {
+      let destFolder = Folder(sourceDoc.path + "/" + name512x512);
+      if (!destFolder.exists) destFolder.create();
+    }
+    create512x512Folder();
+
+    function createSVGFolder() {
+      let destFolder = Folder(sourceDoc.path + "/" + nameSVG);
+      if (!destFolder.exists) destFolder.create();
+    }
+    createSVGFolder();
+
+    function createEPSFolder() {
+      let destFolder = Folder(sourceDoc.path + "/" + nameEPS);
+      if (!destFolder.exists) destFolder.create();
+    }
+    createEPSFolder();
   } catch (e) {
     alert("Something went wrong while creating the folders.", e.message);
   }
@@ -80,84 +109,213 @@ try {
    ** MAIN EXPORT LOOP
    ***********************************/
   try {
-    const myIconsLayer = layers["icons"];
-    const myIconsSublayers = myIconsLayer.layers;
-    for (const bgLayer of layers) {
-      bgLayer.visible = true;
-      for (const pngFileObject of pngFileData) {
-        for (const iconLayer of myIconsSublayers) {
-          iconLayer.visible = true;
-          const pngFile = new File(
-            `${rootPath}/${pngFileObject.size}/${iconLayer.name}${bgLayer.name}.png`
-          );
-          ExportOptionsPNG24.antiAliasing = false;
-          ExportOptionsPNG24.transparency = true;
-          ExportOptionsPNG24.artBoardClipping = true;
-          ExportOptionsPNG24.horizontalScale = pngFileObject.offset;
-          ExportOptionsPNG24.verticalScale = pngFileObject.offset;
-          app.activeDocument.exportFile(
-            pngFile,
-            ExportType.PNG24,
-            new ExportOptionsPNG24()
-          );
-          iconLayer.visible = false;
-        }
-      }
-      saveAsSVG(bgLayer.name);
-      saveAsEPS(bgLayer.name);
-      bgLayer.visible = false;
-    }
-
-    function saveAsSVG(layerName) {
-      for (const iconLayer of myIconsSublayers) {
+    function saveAsPNGAt24x24(layerName) {
+      // target icons sublayers
+      var myIconsLayer = app.activeDocument.layers["icons"];
+      var myIconsSublayers = myIconsLayer.layers;
+      // loop through icons and export png for each
+      for (let j = 0; j < myIconsSublayers.length; j++) {
+        var iconLayer = myIconsSublayers[j];
         iconLayer.visible = true;
-        const svgFile = new File(
-          `${rootPath}/SVG/${iconLayer.name}${layerName}.svg`
+        var pngFile = new File(
+          `${app.activeDocument.path}/24x24/${iconLayer.name}${layerName}.png`
         );
-        ExportOptionsSVG.embedRasterImages = true;
-        ExportOptionsSVG.fontSubsetting = SVGFontSubsetting.GLYPHSUSED;
-        app.activeDocument.exportFile(
-          svgFile,
-          ExportType.SVG,
-          new ExportOptionsSVG()
-        );
+        var type = ExportType.PNG24;
+        var opts = new ExportOptionsPNG24();
+        ExportOptionsPNG24.antiAliasing = false;
+        ExportOptionsPNG24.transparency = true;
+        ExportOptionsPNG24.artBoardClipping = true;
+        ExportOptionsPNG24.horizontalScale = 9.375; // 24px x 24px
+        ExportOptionsPNG24.verticalScale = 9.375; // 24px x 24px
+        app.activeDocument.exportFile(pngFile, type, opts);
         iconLayer.visible = false;
       }
     }
 
-    function saveAsEPS(layerName) {
-      for (const iconLayer of myIconsSublayers) {
+    function saveAsPNGAt32x32(layerName) {
+      // target icons sublayers
+      var myIconsLayer = app.activeDocument.layers["icons"];
+      var myIconsSublayers = myIconsLayer.layers;
+      // loop through icons and export png for each
+      for (let j = 0; j < myIconsSublayers.length; j++) {
+        var iconLayer = myIconsSublayers[j];
         iconLayer.visible = true;
-        let epsFile = new File(
-          `${rootPath}/EPS/${iconLayer.name}${layerName}.eps`
+        var pngFile = new File(
+          `${app.activeDocument.path}/32x32/${iconLayer.name}${layerName}.png`
         );
+        var type = ExportType.PNG24;
+        var opts = new ExportOptionsPNG24();
+        ExportOptionsPNG24.antiAliasing = false;
+        ExportOptionsPNG24.transparency = true;
+        ExportOptionsPNG24.artBoardClipping = true;
+        ExportOptionsPNG24.horizontalScale = 12.5; // 32px x 32px
+        ExportOptionsPNG24.verticalScale = 12.5; // 32px x 32px
+        app.activeDocument.exportFile(pngFile, type, opts);
+        iconLayer.visible = false;
+      }
+    }
+
+    function saveAsPNGAt48x48(layerName) {
+      // target icons sublayers
+      var myIconsLayer = app.activeDocument.layers["icons"];
+      var myIconsSublayers = myIconsLayer.layers;
+      // loop through icons and export png for each
+      for (let j = 0; j < myIconsSublayers.length; j++) {
+        var iconLayer = myIconsSublayers[j];
+        iconLayer.visible = true;
+        var pngFile = new File(
+          `${app.activeDocument.path}/48x48/${iconLayer.name}${layerName}.png`
+        );
+        var type = ExportType.PNG24;
+        var opts = new ExportOptionsPNG24();
+        ExportOptionsPNG24.antiAliasing = false;
+        ExportOptionsPNG24.transparency = true;
+        ExportOptionsPNG24.artBoardClipping = true;
+        ExportOptionsPNG24.horizontalScale = 18.75; // 48px x 48px
+        ExportOptionsPNG24.verticalScale = 18.75; // 48px x 48px
+        app.activeDocument.exportFile(pngFile, type, opts);
+        iconLayer.visible = false;
+      }
+    }
+
+    function saveAsPNGAt64x64(layerName) {
+      // target icons sublayers
+      var myIconsLayer = app.activeDocument.layers["icons"];
+      var myIconsSublayers = myIconsLayer.layers;
+      // loop through icons and export png for each
+      for (let j = 0; j < myIconsSublayers.length; j++) {
+        var iconLayer = myIconsSublayers[j];
+        iconLayer.visible = true;
+        var pngFile = new File(
+          `${app.activeDocument.path}/64x64/${iconLayer.name}${layerName}.png`
+        );
+        var type = ExportType.PNG24;
+        var opts = new ExportOptionsPNG24();
+        ExportOptionsPNG24.antiAliasing = false;
+        ExportOptionsPNG24.transparency = true;
+        ExportOptionsPNG24.artBoardClipping = true;
+        ExportOptionsPNG24.horizontalScale = 25; // 300px x 300px
+        ExportOptionsPNG24.verticalScale = 25; // 300px x 300px
+        app.activeDocument.exportFile(pngFile, type, opts);
+        iconLayer.visible = false;
+      }
+    }
+
+    function saveAsPNGAt300x300(layerName) {
+      // target icons sublayers
+      var myIconsLayer = app.activeDocument.layers["icons"];
+      var myIconsSublayers = myIconsLayer.layers;
+      // loop through icons and export png for each
+      for (let j = 0; j < myIconsSublayers.length; j++) {
+        var iconLayer = myIconsSublayers[j];
+        iconLayer.visible = true;
+        var pngFile = new File(
+          `${app.activeDocument.path}/300x300/${iconLayer.name}${layerName}.png`
+        );
+        var type = ExportType.PNG24;
+        var opts = new ExportOptionsPNG24();
+        ExportOptionsPNG24.antiAliasing = false;
+        ExportOptionsPNG24.transparency = true;
+        ExportOptionsPNG24.artBoardClipping = true;
+        ExportOptionsPNG24.horizontalScale = 117.2; // 300px x 300px
+        ExportOptionsPNG24.verticalScale = 117.2; // 300px x 300px
+        app.activeDocument.exportFile(pngFile, type, opts);
+        iconLayer.visible = false;
+      }
+    }
+
+    function saveAsPNGAt512x512(layerName) {
+      // target icons sublayers
+      var myIconsLayer = app.activeDocument.layers["icons"];
+      var myIconsSublayers = myIconsLayer.layers;
+     
+      // loop through icons and export png for each
+      for (let j = 0; j < myIconsSublayers.length; j++) {
+        var iconLayer = myIconsSublayers[j];
+        iconLayer.visible = true;
+        var pngFile = new File(
+          `${app.activeDocument.path}/512x512/${iconLayer.name}${layerName}.png`
+        );
+        var type = ExportType.PNG24;
+        var opts = new ExportOptionsPNG24();
+        ExportOptionsPNG24.antiAliasing = false;
+        ExportOptionsPNG24.transparency = true;
+        ExportOptionsPNG24.artBoardClipping = true;
+        ExportOptionsPNG24.horizontalScale = 200;
+        ExportOptionsPNG24.verticalScale = 200;
+        app.activeDocument.exportFile(pngFile, type, opts);
+        iconLayer.visible = false;
+      }
+    }
+    // MAJOR BLOCKER BUG!
+    // I want to write to /SVG/ and /EPS/ folder here I can't, only root works
+    // it turns it into a svg
+    // you must duplicate the ai file before you export svg !
+    function saveAsSVG(layerName) { 
+      let myIconsLayer = app.activeDocument.layers["icons"];
+      let myIconsSublayers = myIconsLayer.layers;
+      for (let k = 0; k < myIconsSublayers.length; k++) {
+        let iconLayer = myIconsSublayers[k];
+        iconLayer.visible = true; 
+        let svgFile = new File(
+          // Blocker: If I add /SVG/ after .path/ here it doesn't work! It uses save prompt, I dont want this
+          `${app.activeDocument.path}/${iconLayer.name}${layerName}.svg`
+        ); 
+        let type = ExportType.SVG;
+        ExportOptionsSVG.embedRasterImages = true;
+        ExportOptionsSVG.fontSubsetting = SVGFontSubsetting.GLYPHSUSED;
+        app.activeDocument.exportFile(svgFile, type);
+        iconLayer.visible = false;
+        // DocumentType.ILLUSTRATOR;
+        // //app.activeDocument.save();
+
+      }
+    }
+
+    function saveAsEPS(layerName) {
+      let myIconsLayer = app.activeDocument.layers["icons"];
+      let myIconsSublayers = myIconsLayer.layers;
+      for (let k = 0; k < myIconsSublayers.length; k++) {
+        let iconLayer = myIconsSublayers[k];
+        iconLayer.visible = true; 
+        let epsFile = new File(
+          `${app.activeDocument.path}/${iconLayer.name}${layerName}.eps`
+        );
+        var opts = new EPSSaveOptions();
         EPSSaveOptions.cmykPostScript = false;
         EPSSaveOptions.embedAllFonts = false;
         EPSSaveOptions.artboardRange = "";
         EPSSaveOptions.embedLinkedFiles = true;
         EPSSaveOptions.includeDocumentThumbnails = true;
         EPSSaveOptions.saveMultipleArtboards = true;
-        app.activeDocument.saveAs(epsFile, new EPSSaveOptions());
+        app.activeDocument.saveAs(epsFile, opts);
         iconLayer.visible = false;
       }
     }
+
   } catch (e) {
     alert("Something went wrong while trying to export the icons.", e.message);
   }
   /**********************************
    ** LOOP LAYER VISIBILITY OF ICONS AGAINST BACKGROUND COLORS AND EXECUTE SAVE FUNCTIONS
    ***********************************/
-  // separate SVG and EPS into their own loops after duplicating main file script research?
-  // for (let i = 1; i < layers.length; i++) {
-  //   var bgLayer = layers[i];
-  //   bgLayer.visible = true;
-  //   saveAsSVG(bgLayer.name);
-  //   saveAsEPS(bgLayer.name);
-  //   bgLayer.visible = false;
-  // }
+// separate SVG and EPS into their own loops after duplicating main file script research?
+  for (let i = 1; i < app.activeDocument.layers.length; i++) {
+    var bgLayer = app.activeDocument.layers[i];
+    bgLayer.visible = true;
+    saveAsPNGAt24x24(bgLayer.name);
+    saveAsPNGAt32x32(bgLayer.name);
+    saveAsPNGAt48x48(bgLayer.name);
+    saveAsPNGAt64x64(bgLayer.name);
+    saveAsPNGAt300x300(bgLayer.name);
+    saveAsPNGAt512x512(bgLayer.name);    
+    saveAsSVG(bgLayer.name);
+    saveAsEPS(bgLayer.name);
+    bgLayer.visible = false;
+  }
   // revert the doc from a .svg to a .ai, I don't want it to be svg!
-  DocumentType.ILLUSTRATOR;
-  app.activeDocument.save();
+      DocumentType.ILLUSTRATOR;
+      app.activeDocument.save();
   // close the document here without saving, uncomment for prod
   // app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
 } catch (e) {
