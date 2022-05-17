@@ -4,6 +4,8 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "1.0.0",
   "configurations": [
+    
+
       {
           "type": "extendscript-debug",
           "request": "launch",
@@ -11,5 +13,5 @@
           "program": "${workspaceFolder}/WTW_main_script.js",
           "stopOnEntry": false
       }
-  ]
-}
+  ] 
+}  
